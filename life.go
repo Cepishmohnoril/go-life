@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -36,22 +37,82 @@ func newGame() *Game {
 		g.state[i] = make([]bool, screenHeight)
 	}
 
-	//mb prepopulate???
+	g.prepopulate()
 
 	return g
 }
 
+func (g *Game) prepopulate() {
+	population := screenWidth * screenHeight / 10
+
+	for i := 0; i <= population; i++ {
+		x := rand.Intn(screenWidth - 1)
+		y := rand.Intn(screenHeight - 1)
+		g.state[x][y] = true
+	}
+}
+
 func (g *Game) calculateState() {
-	for x := range g.state {
-		for y := range g.state[x] {
+	nextGeneration := make([][]bool, screenWidth)
 
-			if !g.state[x][y] {
-				g.state[x][y] = true
-				return
+	for x := 0; x < screenWidth; x++ {
+		nextGeneration[x] = make([]bool, screenHeight)
+
+		for y := 0; y < screenHeight; y++ {
+			neighbours := g.neighboursCount(x, y)
+
+			switch {
+			case (neighbours == 2 || neighbours == 3) && g.state[x][y]:
+				nextGeneration[x][y] = true
+			case neighbours < 2:
+				nextGeneration[x][y] = false
+			case neighbours > 3:
+				nextGeneration[x][y] = false
+			case neighbours == 3:
+				nextGeneration[x][y] = true
 			}
-
 		}
 	}
+
+	g.state = nextGeneration
+}
+
+func (g *Game) neighboursCount(x int, y int) int {
+	count := 0
+
+	for dx := -1; dx <= 1; dx++ {
+		for dy := -1; dy <= 1; dy++ {
+
+			if dx == 0 && dy == 0 {
+				continue
+			}
+
+			nx := x + dx
+			ny := y + dy
+
+			if nx < 0 {
+				nx = screenWidth - 1
+			}
+
+			if ny < 0 {
+				ny = screenHeight - 1
+			}
+
+			if nx >= screenWidth {
+				nx = 0
+			}
+
+			if ny >= screenHeight {
+				ny = 0
+			}
+
+			if g.state[nx][ny] {
+				count++
+			}
+		}
+	}
+
+	return count
 }
 
 func (g *Game) renderState() {
@@ -87,6 +148,7 @@ func (g *Game) killCell(x int, y int) {
 
 func (g *Game) Update() error {
 	g.calculateState()
+
 	return nil
 }
 
