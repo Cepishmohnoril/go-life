@@ -45,7 +45,7 @@ func newGame() *Game {
 }
 
 func (g *Game) prepopulate() {
-	population := screenWidth * screenHeight / 10
+	population := screenWidth * screenHeight / 5
 
 	for i := 0; i <= population; i++ {
 		x := rand.Intn(screenWidth - 1)
