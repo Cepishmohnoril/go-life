@@ -10,6 +10,7 @@ import (
 const (
 	screenWidth  = 160
 	screenHeight = 120
+	TPS          = 10
 )
 
 type Game struct {
@@ -22,6 +23,7 @@ func main() {
 
 	ebiten.SetWindowSize(screenWidth*8, screenHeight*8)
 	ebiten.SetWindowTitle("Conway's Game of Life")
+	ebiten.SetTPS(TPS)
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
