@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"math/rand"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -16,6 +17,7 @@ const (
 type Game struct {
 	pixels []byte
 	state  [][]bool
+	run    bool
 }
 
 func main() {
@@ -33,15 +35,31 @@ func newGame() *Game {
 	g := &Game{
 		pixels: make([]byte, screenWidth*screenHeight*4),
 		state:  make([][]bool, screenWidth),
+		run:    false,
 	}
 
 	for i := range g.state {
 		g.state[i] = make([]bool, screenHeight)
 	}
 
+	go g.listenKeyboard()
+
 	g.prepopulate()
 
 	return g
+}
+
+func (g *Game) listenKeyboard() {
+	for {
+		if ebiten.IsKeyPressed(ebiten.KeySpace) {
+			g.toggleRun()
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+}
+
+func (g *Game) toggleRun() {
+	g.run = !g.run
 }
 
 func (g *Game) prepopulate() {
@@ -131,25 +149,26 @@ func (g *Game) renderState() {
 }
 
 func (g *Game) drawCell(x int, y int) {
-	i := y*screenWidth + x
-
-	g.pixels[4*i] = 0xff
-	g.pixels[4*i+1] = 0xff
-	g.pixels[4*i+2] = 0xff
-	g.pixels[4*i+3] = 0xff
+	g.setCell(0xff, x, y)
 }
 
 func (g *Game) killCell(x int, y int) {
+	g.setCell(0, x, y)
+}
+
+func (g *Game) setCell(val byte, x int, y int) {
 	i := y*screenWidth + x
 
-	g.pixels[4*i] = 0
-	g.pixels[4*i+1] = 0
-	g.pixels[4*i+2] = 0
-	g.pixels[4*i+3] = 0
+	g.pixels[4*i] = val
+	g.pixels[4*i+1] = val
+	g.pixels[4*i+2] = val
+	g.pixels[4*i+3] = val
 }
 
 func (g *Game) Update() error {
-	g.calculateState()
+	if g.run {
+		g.calculateState()
+	}
 
 	return nil
 }
