@@ -8,3 +8,4 @@ I did it for self education purpose. Feel free to use, copy or modify it in any 
 ## Controls
 
 Space - calculation pause toggle
+Left Click - toggle cell state

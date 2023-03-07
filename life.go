@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -42,17 +43,22 @@ func newGame() *Game {
 		g.state[i] = make([]bool, screenHeight)
 	}
 
-	go g.listenKeyboard()
+	go g.listenInput()
 
 	g.prepopulate()
 
 	return g
 }
 
-func (g *Game) listenKeyboard() {
+func (g *Game) listenInput() {
 	for {
 		if ebiten.IsKeyPressed(ebiten.KeySpace) {
 			g.toggleRun()
+			time.Sleep(500 * time.Millisecond)
+		}
+
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			g.toggleCell()
 			time.Sleep(500 * time.Millisecond)
 		}
 	}
@@ -60,6 +66,11 @@ func (g *Game) listenKeyboard() {
 
 func (g *Game) toggleRun() {
 	g.run = !g.run
+}
+
+func (g *Game) toggleCell() {
+	x, y := ebiten.CursorPosition()
+	g.state[x][y] = !g.state[x][y]
 }
 
 func (g *Game) prepopulate() {
